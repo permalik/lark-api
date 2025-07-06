@@ -1,2 +1,2 @@
-# yyyoink-api
-application:Compression, Binary, and LLM Toolkit APIs
+# craft-api
+application:LLM APIs
