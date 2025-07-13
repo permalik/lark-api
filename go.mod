@@ -1,4 +1,4 @@
-module github.com/permalik/craft-api
+module github.com/permalik/yyyoink-api
 
 go 1.23.8
 
