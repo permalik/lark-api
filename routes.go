@@ -1,9 +1,11 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func (app *application) Router() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("127.0.0.1/turn", app.PostPrompt)
+	mux.HandleFunc("/prompt", app.PostPrompt)
 	return mux
 }
