@@ -1,4 +1,4 @@
-module github.com/permalik/yyyoink-api
+module github.com/permalik/lark-api
 
 go 1.23.8
 

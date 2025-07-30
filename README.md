@@ -1,2 +1,2 @@
-# yyyoink-api
-application:LLM APIs
+# lark-api
+application:LLM Client API Gateway
