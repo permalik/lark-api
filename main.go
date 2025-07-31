@@ -54,6 +54,9 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
+	InitProducer()
+	defer ShutdownProducer()
+
 	go func() {
 		logger.Printf("Starting %s server on port %s\n", cfg.env, srv.Addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
