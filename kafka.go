@@ -15,7 +15,7 @@ func InitProducer() {
 	var err error
 	client, err = kgo.NewClient(
 		kgo.SeedBrokers(seeds...),
-		kgo.ConsumerGroup("llm"),
+		kgo.ConsumerGroup("lark-llm"),
 		kgo.ConsumeTopics("prompt.raw"),
 	)
 	if err != nil {
