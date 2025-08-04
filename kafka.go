@@ -16,7 +16,7 @@ func InitProducer() {
 	client, err = kgo.NewClient(
 		kgo.SeedBrokers(seeds...),
 		kgo.ConsumerGroup("lark-api"),
-		kgo.ConsumeTopics("prompt.raw"),
+		kgo.ConsumeTopics("saga.prompt.raw"),
 	)
 	if err != nil {
 		panic(err)
@@ -29,7 +29,7 @@ func ProducePromptRaw(prompt string) {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	record := &kgo.Record{Topic: "prompt.raw", Value: []byte(prompt)}
+	record := &kgo.Record{Topic: "saga.prompt.raw", Value: []byte(prompt)}
 	client.Produce(ctx, record, func(_ *kgo.Record, err error) {
 		defer wg.Done()
 		if err != nil {
