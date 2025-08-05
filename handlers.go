@@ -8,7 +8,7 @@ import (
 
 func (app *application) PostPrompt(w http.ResponseWriter, r *http.Request) {
 	type Prompt struct {
-		Id      int    `json:"id"`
+		MsgId   int    `json:"msgId"`
 		Content string `json:"content"`
 	}
 	var prompt Prompt
@@ -22,7 +22,7 @@ func (app *application) PostPrompt(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Received prompt: %+v\n", prompt)
 
 	cleanedPrompt := Prompt{
-		Id:      prompt.Id,
+		MsgId:   prompt.MsgId,
 		Content: prompt.Content,
 	}
 	promptBytes, err := json.Marshal(cleanedPrompt)
