@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -19,7 +18,9 @@ func (app *application) PostPrompt(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	fmt.Printf("Received prompt: %+v\n", prompt)
+	app.logger.Debugw("received prompt:",
+		"prompt", prompt,
+	)
 
 	cleanedPrompt := Prompt{
 		MsgId:   prompt.MsgId,
@@ -27,13 +28,16 @@ func (app *application) PostPrompt(w http.ResponseWriter, r *http.Request) {
 	}
 	promptBytes, err := json.Marshal(cleanedPrompt)
 	if err != nil {
-		fmt.Println("Error marshaling prompt:", err)
+		app.logger.Errorw("error marshaling prompt:",
+			"err", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	promptString := string(promptBytes)
-	ProducePromptRaw(promptString)
-	fmt.Println("Produced prompt..")
+	app.ProducePromptRaw(promptString)
+
+	app.logger.Infow("produced:",
+		"prompt", promptString)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

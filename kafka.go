@@ -2,43 +2,41 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
-var client *kgo.Client
-
-func InitProducer() {
+func (app *application) InitProducer() {
 	seeds := []string{"localhost:9092"}
 	var err error
-	client, err = kgo.NewClient(
+	app.client, err = kgo.NewClient(
 		kgo.SeedBrokers(seeds...),
 		kgo.ConsumerGroup("lark-api"),
 		kgo.ConsumeTopics("saga.prompt.raw"),
 	)
 	if err != nil {
-		panic(err)
+		app.logger.Panic(err)
 	}
-	fmt.Println("Producer initialized")
+	app.logger.Info("Producer initialized")
 }
 
-func ProducePromptRaw(prompt string) {
+func (app *application) ProducePromptRaw(prompt string) {
 	ctx := context.Background()
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 	record := &kgo.Record{Topic: "saga.prompt.raw", Value: []byte(prompt)}
-	client.Produce(ctx, record, func(_ *kgo.Record, err error) {
+	app.client.Produce(ctx, record, func(_ *kgo.Record, err error) {
 		defer wg.Done()
 		if err != nil {
-			fmt.Printf("Record had a produce error: %v\n", err)
+			app.logger.Errorw("failed to produce:",
+				"err", err)
 		}
 	})
 	wg.Wait()
 }
 
-func ShutdownProducer() {
-	client.Close()
+func (app *application) ShutdownProducer() {
+	app.client.Close()
 }
