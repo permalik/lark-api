@@ -1,0 +1,16 @@
+services:
+  lark-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lark_api
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      NODE_ENV: production
+
+networks:
+  lark-network:
+    external: true

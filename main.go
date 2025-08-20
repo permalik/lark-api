@@ -91,7 +91,9 @@ type application struct {
 }
 
 func newLogger() (*zap.Logger, error) {
-	dir := "/Users/tymalik/Docs/Git/lark-api/logs"
+	dir := "/app/logs"
+	// TODO: local
+	// dir := "/Users/tymalik/Docs/Git/lark-api/logs"
 	fileName := "out.log"
 	path := fmt.Sprintf("%s/%s", dir, fileName)
 
@@ -107,6 +109,7 @@ func newLogger() (*zap.Logger, error) {
 		return nil, fmt.Errorf("failed opening log file: %w", err)
 	}
 
+	// TODO: set chicago time
 	encoderCfg := zap.NewProductionEncoderConfig()
 	encoderCfg.TimeKey = "timestamp"
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
