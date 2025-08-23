@@ -6,6 +6,7 @@ import (
 )
 
 func (app *application) PostPrompt(w http.ResponseWriter, r *http.Request) {
+
 	type Prompt struct {
 		MsgId   int    `json:"msgId"`
 		Content string `json:"content"`
