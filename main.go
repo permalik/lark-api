@@ -51,9 +51,6 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	app.InitProducer()
-	defer app.ShutdownProducer()
-
 	go func() {
 		app.logger.Infow("starting server:",
 			"env", cfg.env,
@@ -63,6 +60,25 @@ func main() {
 			app.logger.Fatal(err)
 		}
 	}()
+
+	app.InitKafka()
+	defer app.ShutdownKafka()
+
+	app.logger.Info("starting consumer");
+	for {
+		fetches := app.client.PollFetches(app.ctx)
+		if errs := fetches.Errors(); len(errs) > 0 {
+			app.logger.panic(errs)
+		}
+
+		iter := fetches.RecordIter()
+		for !iter.Done() {
+			record := iter.Next()
+			app.logger.Infow("consumed",
+				"response", string(record.Value)
+			)
+		}
+	}
 
 	<-ctx.Done()
 	app.logger.Info("Shutting down server..")
