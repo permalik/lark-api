@@ -38,7 +38,7 @@ func (app *application) PostPrompt(w http.ResponseWriter, r *http.Request) {
 	app.ProducePromptRaw(promptString)
 
 	app.logger.Infow("produced:",
-		"prompt", promptString
+		"prompt", promptString,
 	)
 
 	w.Header().Set("Content-Type", "application/json")

@@ -37,6 +37,6 @@ func (app *application) ProducePromptRaw(prompt string) {
 	wg.Wait()
 }
 
-func (app *application) ShutdownProducer() {
+func (app *application) ShutdownKafka() {
 	app.client.Close()
 }

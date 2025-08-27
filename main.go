@@ -16,32 +16,38 @@ import (
 )
 
 func main() {
+	fmt.Println("start")
 	var cfg config
-	flag.StringVar(&cfg.env, "env", "development", "environment (development|staging|production)")
-	flag.IntVar(&cfg.port, "port", 5555, "Network port (default 5555)")
+	flag.StringVar(&cfg.env, "env", "local", "environment (local|development|staging|production)")
+	flag.IntVar(&cfg.port, "port", 4444, "Network port (default 4444)")
+	flag.StringVar(&cfg.logDir, "logDir", "./logs", "Log directory (default ./logs)")
 	flag.Parse()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	logger, _ := newLogger()
+	logger, err := newLogger(cfg.logDir)
+	if err != nil {
+		fmt.Println("failed to initialize logger: ", err)
+	}
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	var kgo *kgo.Client
+	if err := godotenv.Load(cfg.env + ".env"); err != nil {
+		sugar.Fatalw("failed to load .env", "err", err)
+	}
 
 	app := &application{
 		config: cfg,
 		ctx:    ctx,
 		logger: sugar,
-		client: kgo,
 	}
 
-	err := godotenv.Load()
-	if err != nil {
-		app.logger.Fatalw("Failed to load .env",
-			"err", err)
-	}
+	logger.Info("starting kafka")
+	app.InitKafka()
+	defer app.ShutdownKafka()
+
+	go app.consumeLoop()
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
@@ -61,25 +67,6 @@ func main() {
 		}
 	}()
 
-	app.InitKafka()
-	defer app.ShutdownKafka()
-
-	app.logger.Info("starting consumer");
-	for {
-		fetches := app.client.PollFetches(app.ctx)
-		if errs := fetches.Errors(); len(errs) > 0 {
-			app.logger.panic(errs)
-		}
-
-		iter := fetches.RecordIter()
-		for !iter.Done() {
-			record := iter.Next()
-			app.logger.Infow("consumed",
-				"response", string(record.Value)
-			)
-		}
-	}
-
 	<-ctx.Done()
 	app.logger.Info("Shutting down server..")
 
@@ -94,9 +81,26 @@ func main() {
 	logger.Info("Server gracefully exited.")
 }
 
+func (app *application) consumeLoop() {
+	app.logger.Info("starting consumer")
+	for {
+		fetches := app.client.PollFetches(app.ctx)
+		if errs := fetches.Errors(); len(errs) > 0 {
+			app.logger.Panic(errs)
+		}
+
+		iter := fetches.RecordIter()
+		for !iter.Done() {
+			record := iter.Next()
+			app.logger.Infow("consumed", "response", string(record.Value))
+		}
+	}
+}
+
 type config struct {
-	env  string
-	port int
+	env    string
+	port   int
+	logDir string
 }
 
 type application struct {
@@ -106,19 +110,12 @@ type application struct {
 	client *kgo.Client
 }
 
-func newLogger() (*zap.Logger, error) {
-	dir := "/app/logs"
-	// TODO: local
-	// dir := "/Users/tymalik/Docs/Git/lark-api/logs"
-	fileName := "out.log"
-	path := fmt.Sprintf("%s/%s", dir, fileName)
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			fmt.Println("failed creating log file:")
-			return nil, fmt.Errorf("failed creating log dir: %w", err)
-		}
+func newLogger(logDir string) (*zap.Logger, error) {
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed creating log dir: %w", err)
 	}
+
+	path := fmt.Sprintf("%s/out.log", logDir)
 
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
