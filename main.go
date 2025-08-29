@@ -30,7 +30,12 @@ func main() {
 	if err != nil {
 		fmt.Println("failed to initialize logger: ", err)
 	}
-	defer logger.Sync()
+	defer func(logger *zap.Logger) {
+		err := logger.Sync()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "failed to sync logger: %v\n", err)
+		}
+	}(logger)
 	sugar := logger.Sugar()
 
 	if err := godotenv.Load(cfg.env + ".env"); err != nil {
