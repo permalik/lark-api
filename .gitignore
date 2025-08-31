@@ -22,7 +22,10 @@ go.work
 go.work.sum
 
 # env file
-.env
+*.env*
+!local.env
+!development.env
+!staging.env
 /.direnv/
 
 **/*.DS_Store
