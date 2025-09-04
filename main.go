@@ -25,7 +25,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	logger, err := newLogger(cfg.lark_api_development_logdir)
+	logger, err := newLogger(cfg.logDir)
 	if err != nil {
 		fmt.Println("failed to initialize logger: ", err)
 	}
@@ -50,7 +50,7 @@ func main() {
 	go app.consumeLoop()
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.lark_api_development_port),
+		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.Router(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
@@ -59,7 +59,7 @@ func main() {
 
 	go func() {
 		app.logger.Infow("starting server:",
-			"env", cfg.lark_api_development_env,
+			"env", cfg.env,
 			"addr", srv.Addr,
 		)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
