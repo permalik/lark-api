@@ -9,9 +9,8 @@ RUN go build -o app .
 FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/app .
-COPY .env .
 
 RUN mkdir -p /app/logs
 
-EXPOSE 5555
+EXPOSE 4444
 CMD ["./app"]

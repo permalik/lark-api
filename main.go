@@ -18,15 +18,15 @@ import (
 func main() {
 	fmt.Println("start")
 	var cfg config
-	flag.StringVar(&cfg.env, "env", "local", "environment (local|development|staging|production)")
-	flag.IntVar(&cfg.port, "port", 4444, "Network port (default 4444)")
-	flag.StringVar(&cfg.logDir, "logDir", "./logs", "Log directory (default ./logs)")
+	flag.StringVar(&cfg.lark_api_development_env, "lark_api_development_env", "local", "environment (local|development|staging|production)")
+	flag.IntVar(&cfg.lark_api_development_port, "lark_api_development_port", 4444, "Network port (default 4444)")
+	flag.StringVar(&cfg.lark_api_development_logdir, "lark_api_development_logdir", "./logs", "Log directory (default ./logs)")
 	flag.Parse()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	logger, err := newLogger(cfg.logDir)
+	logger, err := newLogger(cfg.lark_api_development_logdir)
 	if err != nil {
 		fmt.Println("failed to initialize logger: ", err)
 	}
@@ -37,10 +37,6 @@ func main() {
 		}
 	}(logger)
 	sugar := logger.Sugar()
-
-	if err := godotenv.Load(cfg.env + ".env"); err != nil {
-		sugar.Fatalw("failed to load .env", "err", err)
-	}
 
 	app := &application{
 		config: cfg,
@@ -55,7 +51,7 @@ func main() {
 	go app.consumeLoop()
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
+		Addr:         fmt.Sprintf(":%d", cfg.lark_api_development_port),
 		Handler:      app.Router(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
@@ -64,7 +60,7 @@ func main() {
 
 	go func() {
 		app.logger.Infow("starting server:",
-			"env", cfg.env,
+			"env", cfg.lark_api_development_env,
 			"addr", srv.Addr,
 		)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
