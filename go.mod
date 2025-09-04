@@ -3,7 +3,6 @@ module github.com/permalik/lark-api
 go 1.23.8
 
 require (
-	github.com/joho/godotenv v1.5.1
 	github.com/rs/cors v1.11.1
 	go.uber.org/zap v1.27.0
 )

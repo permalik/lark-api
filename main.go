@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
