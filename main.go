@@ -17,9 +17,9 @@ import (
 func main() {
 	fmt.Println("start")
 	var cfg config
-	flag.StringVar(&cfg.lark_api_development_env, "lark_api_development_env", "local", "environment (local|development|staging|production)")
-	flag.IntVar(&cfg.lark_api_development_port, "lark_api_development_port", 4444, "Network port (default 4444)")
-	flag.StringVar(&cfg.lark_api_development_logdir, "lark_api_development_logdir", "./logs", "Log directory (default ./logs)")
+	flag.StringVar(&cfg.env, "lark_api_development_env", "local", "environment (local|development|staging|production)")
+	flag.IntVar(&cfg.port, "lark_api_development_port", 4444, "Network port (default 4444)")
+	flag.StringVar(&cfg.logDir, "lark_api_development_logdir", "./logs", "Log directory (default ./logs)")
 	flag.Parse()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
